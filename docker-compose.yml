@@ -27,8 +27,7 @@ services:
       - CONFIGSERVER_IMPORT=configserver:${CONFIG_SERVER_URL}
       - SPRING_CLOUD_CONFIG_FAIL_FAST=true
       - SPRING_PROFILES_ACTIVE=prod
-      - MENU_SERVICE_URL=${MENU_SERVICE_URL}
-      - REVIEW_SERVICE_URL=${REVIEW_SERVICE_URL}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
 
   review-service:
     image: "review-service"
@@ -47,6 +46,7 @@ services:
       - DB_USER=${POSTGRES_DB_USER}
       - DB_PASSWORD=${POSTGRES_DB_PASSWORD}
       - DB_URL=${REVIEW_DB_URL}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
 
   orders-service:
     image: "orders-service"
@@ -66,9 +66,9 @@ services:
       - DB_PASSWORD=${POSTGRES_DB_PASSWORD}
       - DB_URL=${ORDERS_DB_URL}
       - FLYWAY_DB_URL=${ORDERS_DB_FLYWAY_URL}
-      - MENU_SERVICE_URL=${MENU_SERVICE_URL}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - SCHEMA_REGISTRY_URL=${SCHEMA_REGISTRY_URL}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
 
   dispatcher-service:
     image: "dispatcher-service"
@@ -102,6 +102,40 @@ services:
       - DB_USER=${POSTGRES_DB_USER}
       - DB_PASSWORD=${POSTGRES_DB_PASSWORD}
       - DB_URL=${MENU_DB_URL}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
+
+  menu-service-2:
+    image: "menu-service"
+    container_name: "menu-service-2"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    ports:
+      - "9090:9091"
+    environment:
+      - CONFIGSERVER_IMPORT=configserver:${CONFIG_SERVER_URL}
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_USER=${POSTGRES_DB_USER}
+      - DB_PASSWORD=${POSTGRES_DB_PASSWORD}
+      - DB_URL=${MENU_DB_URL}
+      - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
+
+  discovery-service:
+    image: "discovery-service"
+    container_name: "discovery-service"
+    ports:
+      - "8761:8761"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    environment:
+      - CONFIGSERVER_IMPORT=configserver:${CONFIG_SERVER_URL}
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=discovery-service
 
   postgres:
     image: "postgres:16.1"
