@@ -275,7 +275,9 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: "keycloak"
-    command: start-dev # start keycloak in development mode
+    command: start-dev --import-realm # start keycloak in development mode
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
