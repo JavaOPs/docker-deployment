@@ -68,7 +68,6 @@ services:
       - DB_USER=${POSTGRES_DB_USER}
       - DB_PASSWORD=${POSTGRES_DB_PASSWORD}
       - DB_URL=${ORDERS_DB_URL}
-      - FLYWAY_DB_URL=${ORDERS_DB_FLYWAY_URL}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - SCHEMA_REGISTRY_URL=${SCHEMA_REGISTRY_URL}
       - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
@@ -261,14 +260,7 @@ services:
       CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components/,/connectors/'
     volumes:
       - connect-data:/opt/docker/db/data
-    command:
-      - bash
-      - -c
-      - |
-        echo "Installing connector plugins"
-        confluent-hub install --no-prompt debezium/debezium-connector-postgresql:2.5.3
-        echo "Launching Kafka Connect worker"
-        /etc/confluent/docker/run
+      - ./debezium/debezium-connector-postgres:/connectors/debezium-connector-postgres
 
   redis:
     image: "redis:7.2.4"
