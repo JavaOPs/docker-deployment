@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Полностью глушим тяжелый HTTP-трафик, JWT-токены и логи Netty -->
+    <logger name="io.gatling.http.engine.response" level="WARN" />
+    <logger name="io.gatling.http.engine.tx" level="WARN" />
+    <logger name="io.gatling.http.client" level="WARN" />
+    <logger name="io.netty" level="WARN" />
+    <!-- Глушим служебные INFO логи планировщика нагрузочных фаз -->
+    <logger name="io.gatling.core.controller.inject" level="WARN" />
+    <!-- Оставляем вывод только для базовой сводной статистики Gatling -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

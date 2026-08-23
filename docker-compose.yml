@@ -22,6 +22,11 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     environment:
       - CONFIGSERVER_IMPORT=configserver:${CONFIG_SERVER_URL}
       - SPRING_CLOUD_CONFIG_FAIL_FAST=true
@@ -29,6 +34,7 @@ services:
       - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
       - ZIPKIN_URL=${ZIPKIN_URL}
       - LOKI_URL=${LOKI_URL}
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75 -Djdk.virtualThreadScheduler.parallelism=8
 
   review-service:
     image: "review-service"
@@ -38,6 +44,11 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     ports:
       - "9093:9093"
     environment:
@@ -50,6 +61,7 @@ services:
       - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
       - ZIPKIN_URL=${ZIPKIN_URL}
       - LOKI_URL=${LOKI_URL}
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75
 
   orders-service:
     image: "orders-service"
@@ -59,6 +71,11 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     ports:
       - "9092:9092"
     environment:
@@ -73,6 +90,7 @@ services:
       - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
       - ZIPKIN_URL=${ZIPKIN_URL}
       - LOKI_URL=${LOKI_URL}
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75 -Djdk.virtualThreadScheduler.parallelism=8
 
   dispatcher-service:
     image: "dispatcher-service"
@@ -80,6 +98,11 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     ports:
       - "9096:9096"
     environment:
@@ -89,6 +112,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - SCHEMA_REGISTRY_URL=${SCHEMA_REGISTRY_URL}
       - LOKI_URL=${LOKI_URL}
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75
 
   menu-service:
     image: "menu-service"
@@ -98,6 +122,11 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     ports:
       - "9091:9091"
     environment:
@@ -110,6 +139,7 @@ services:
       - DISCOVERY_SERVICE_URL=${DISCOVERY_SERVICE_URL}
       - ZIPKIN_URL=${ZIPKIN_URL}
       - LOKI_URL=${LOKI_URL}
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75
 
 #  menu-service-2:
 #    image: "menu-service"
@@ -156,6 +186,11 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     environment:
       - CONFIGSERVER_IMPORT=configserver:${CONFIG_SERVER_URL}
       - SPRING_CLOUD_CONFIG_FAIL_FAST=true
@@ -166,6 +201,9 @@ services:
       - KEYCLOAK_URL=${KEYCLOAK_URL}
       - JWK_SET_URL=${JWK_SET_URL}
       - LOKI_URL=${LOKI_URL}
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75
+      - SPRING_CLOUD_CIRCUITBREAKER_BULKHEAD_RESILIENCE4J_ENABLED=false
+      - SPRING_CLOUD_CONFIG_LABEL=load_test
 
   postgres:
     image: "postgres:16.1"
@@ -184,11 +222,14 @@ services:
       timeout: 60s
       retries: 5
       start_period: 80s
+    #  не отключайте синхронную фиксацию на диск на prod:  synchronous_commit=off -c fsync=off
     command: >
       -c wal_level=logical
       -c max_wal_senders=1
       -c max_replication_slots=1
-
+      -c max_connections=500
+#      -c synchronous_commit=off
+#      -c fsync=off
   kafka:
     image: confluentinc/cp-kafka:7.5.2
     hostname: kafka

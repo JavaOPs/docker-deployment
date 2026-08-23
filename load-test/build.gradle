@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id 'io.gatling.gradle' version '3.14.9.8'
+}
+
+group = 'ru.cloudjava'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()}
+
+dependencies {
+    gatlingImplementation 'io.gatling:gatling-core'
+    gatlingImplementation 'io.gatling:gatling-http'
+    gatlingImplementation 'io.gatling.highcharts:gatling-charts-highcharts'
+}
